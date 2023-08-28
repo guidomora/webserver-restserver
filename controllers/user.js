@@ -1,7 +1,7 @@
 const { response } = require("express");
 const User = require("../models/user"); // nos va a permitir crear instancias de nuestro modelo
 const bcrypt = require('bcryptjs'); // encriptar la password
-const { validationResult } = require("express-validator");
+
 
 const usersGet = (req, res = response) => {
   const { q, nombre, apikey = "no hay" } = req.query; // query http://localhost:8080/api/users?q=hola&nombre=guido
@@ -25,11 +25,6 @@ const usersPut = (req, res) => {
 };
 
 const usersPost = async (req, res) => {
-  const errors = validationResult(req)
-  if (!errors.isEmpty()) { // si errors no esta vacio, retorna el error
-    return res.status(400).json(errors)
-  }
-
   // se crea un usuario en la db
   //el body siempre viene de la request
 

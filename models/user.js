@@ -34,4 +34,9 @@ const UserSchema = Schema({
     },
 })
 
+UserSchema.methods.toJSON =  function() { // debe ser una funcion normal, sobreescribimos este metodo
+    const {__v , password, ...user} = this.toObject() // para que el __v y la password no las traiga
+    return user
+}
+
 module.exports = model('User', UserSchema)
