@@ -1,8 +1,11 @@
 const { response } = require("express");
+const User = require("../models/user"); // nos va a permitir crear instancias de nuestro modelo
+const bcrypt = require('bcryptjs'); // encriptar la password
+const { validationResult } = require("express-validator");
 
 const usersGet = (req, res = response) => {
   const { q, nombre, apikey = "no hay" } = req.query; // query http://localhost:8080/api/users?q=hola&nombre=guido
-                                                    // si no hay apikey en este caso, se reemplaza por lo establecido
+  // si no hay apikey en este caso, se reemplaza por lo establecido
 
   res.json({
     msg: "post Bien!",
@@ -21,15 +24,34 @@ const usersPut = (req, res) => {
   });
 };
 
-const usersPost = (req, res) => {
+const usersPost = async (req, res) => {
+  const errors = validationResult(req)
+  if (!errors.isEmpty()) { // si errors no esta vacio, retorna el error
+    return res.status(400).json(errors)
+  }
+
+  // se crea un usuario en la db
   //el body siempre viene de la request
 
-  const { nombre, edad } = req.body; // desestructuramos lo que queremos traer del body ej http://localhost:8080/api/users/10
+  // const { nombre, edad } = req.body; desestructuramos lo que queremos traer del body ej http://localhost:8080/api/users/10
+
+  const { name, mail, password, role, state } = req.body;
+  const user = new User({name, mail, password, role, state});
+
+  const emailExists =  await User.findOne({mail}) // busca el mail en los usuarios
+  if (emailExists) { // si existe arroja el error
+    return res.status(400).json({
+      msg:'El correo ya esta registrado'
+    })
+  }
+
+  user.password = bcrypt.hashSync(password) // encriptar password
+
+  await user.save();
 
   res.json({
     msg: "post Bien!",
-    nombre,
-    edad,
+    user
   });
 };
 
