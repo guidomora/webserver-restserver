@@ -3,24 +3,34 @@ const User = require("../models/user"); // nos va a permitir crear instancias de
 const bcrypt = require('bcryptjs'); // encriptar la password
 
 
-const usersGet = (req, res = response) => {
-  const { q, nombre, apikey = "no hay" } = req.query; // query http://localhost:8080/api/users?q=hola&nombre=guido
+const usersGet = async (req, res = response) => {
+  //const { q, nombre, apikey = "no hay" } = req.query; // query http://localhost:8080/api/users?q=hola&nombre=guido
   // si no hay apikey en este caso, se reemplaza por lo establecido
 
+  const {limite = 5, desde = 0 } = req.query 
+  const users = await User.find()
+  .limit(Number(limite)) // limit sirve para limitar la cantidad de resultados
+                        // hay que parsearlo a numero porque lo que recibe de la query es un string
+  .skip(Number(desde))
+
+
   res.json({
-    msg: "post Bien!",
-    q,
-    nombre,
-    apikey,
+    users
   });
 };
 
-const usersPut = (req, res) => {
-  const id = req.params.id; // parametros en la ruta no usamos el body
+const usersPut = async (req, res) => {
+  const {id} = req.params; // parametros en la ruta no usamos el body
+  const {_id, password, google, mail, ...rest} = req.body
+
+  if (password) {
+    rest.password = bcrypt.hashSync(password)
+  }
+
+  const user = await User.findByIdAndUpdate(id, rest) // recibimos el id y actualizamos el resto
 
   res.json({
-    msg: "put Bien!",
-    id,
+    user,
   });
 };
 
