@@ -18,7 +18,7 @@ const isEmailExists = async (mail ='') => {
 };
 
 const existsUserById = async (id) => {
-  const userExists = await User.findById({ id }); // busca el mail en los usuarios
+  const userExists = await User.findById(id ); // busca el mail en los usuarios
   if (!userExists) {
     // si no existe arroja el error
     throw new Error(`The id ${id} doesn't exists`);

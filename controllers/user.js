@@ -66,10 +66,18 @@ const usersPost = async (req, res) => {
   });
 };
 
-const usersDelete = (req, res) => {
-  res.json({
-    msg: "delete Bien!",
-  });
+const usersDelete = async (req, res) => {
+
+  const {id} = req.params // obtenemos el ide de los parametros
+
+  // const user = await User.findByIdAndDelete(id)  Borra el usuario segun su id (no es la forma recomendada porque se borra completamente)
+
+  // de esta forma al poner el estado en false no nos figura mas en los usuarios "activos" pero podemos seguir viendolo en la db
+  const user = await User.findByIdAndUpdate(id, {state: false}) // obtenemos el usuario por id y se cambia el estado a false
+
+  res.json(
+    user
+  );
 };
 
 const usersPatch = (req, res) => {
