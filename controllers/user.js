@@ -8,9 +8,9 @@ const usersGet = async (req, res = response) => {
 
   const { limite = 5, desde = 0 } = req.query;
 
-
   // esto al ser un arrya lo podemos desestructurar, en base al orden en que se crea
-  const [total, users] = await Promise.all([// Promise.all ejecuta las promesas de manera simultanea y no va a avanzar hasta que hayan terminado de ejecutarse
+  const [total, users] = await Promise.all([
+    // Promise.all ejecuta las promesas de manera simultanea y no va a avanzar hasta que hayan terminado de ejecutarse
     User.countDocuments({ state: true }), // total de usuarios que tienen estado true
     User.find({ state: true }) // solo devuelve los que el estado es true
       .limit(Number(limite)) // limit sirve para limitar la cantidad de resultados
@@ -67,17 +67,18 @@ const usersPost = async (req, res) => {
 };
 
 const usersDelete = async (req, res) => {
-
-  const {id} = req.params // obtenemos el ide de los parametros
+  const { id } = req.params; // obtenemos el id del user a borrar de los parametros
 
   // const user = await User.findByIdAndDelete(id)  Borra el usuario segun su id (no es la forma recomendada porque se borra completamente)
 
   // de esta forma al poner el estado en false no nos figura mas en los usuarios "activos" pero podemos seguir viendolo en la db
-  const user = await User.findByIdAndUpdate(id, {state: false}) // obtenemos el usuario por id y se cambia el estado a false
+  const user = await User.findByIdAndUpdate(id, { state: false }); // obtenemos el usuario por id y se cambia el estado a false
+  const authUser = req.user;
 
-  res.json(
-    user
-  );
+  res.json({
+    user,
+    authUser,
+  });
 };
 
 const usersPatch = (req, res) => {
