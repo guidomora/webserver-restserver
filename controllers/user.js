@@ -45,8 +45,8 @@ const usersPost = async (req, res) => {
 
   // const { nombre, edad } = req.body; desestructuramos lo que queremos traer del body ej http://localhost:8080/api/users/10
 
-  const { name, mail, password, role, state } = req.body;
-  const user = new User({ name, mail, password, role, state });
+  const { name, mail, password, role, state, google } = req.body;
+  const user = new User({ name, mail, password, role, state, google });
 
   const emailExists = await User.findOne({ mail }); // busca el mail en los usuarios
   if (emailExists) {
