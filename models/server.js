@@ -6,8 +6,12 @@ class Server {
   constructor() {
     this.app = express();
     this.port = process.env.PORT
-    this.userPath = '/api/users'
-    this.authPath = '/api/auth'
+    this.paths = {
+      auth: '/api/auth',
+      users: '/api/users',
+      categories: '/api/categories',
+      products: '/api/products',
+    }
 
     // Conectar la base de datos
     this.dbConnect()
@@ -35,10 +39,12 @@ class Server {
   }
 
   routes() {// llamando endpoints
-    this.app.use(this.authPath, require('../routes/auth'))
+    this.app.use(this.paths.auth, require('../routes/auth'))
 
            // ruta que vamos a tener que llamar
-    this.app.use(this.userPath , require('../routes/user')) //path donde se encuentran
+    this.app.use(this.paths.users , require('../routes/user')) //path donde se encuentran
+    this.app.use(this.paths.categories , require('../routes/categories'))
+    this.app.use(this.paths.products , require('../routes/products'))
     
   }
 
