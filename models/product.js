@@ -26,7 +26,7 @@ const ProductSchema = Schema({
     required: true,
   },
   description: {type: String},
-  avalible: {type: Boolean, defaul: true}
+  avalible: {type: Boolean, default: true}
 });
 
 ProductSchema.methods.toJSON = function () {

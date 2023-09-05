@@ -64,7 +64,9 @@ const categoryUpdate = async (req = request, res = response) => {
   data.name = data.name.toUpperCase()
   data.user = req.user._id
 
-  const category = await Category.findByIdAndUpdate(id, data, {new: true});
+
+  // el {new} indica que Mongoose devuelva el documento actualizado después de realizar la operación de actualización
+  const category = await Category.findByIdAndUpdate(id, data, {new: true}); 
 
   res.json({
     category,

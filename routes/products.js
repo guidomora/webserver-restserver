@@ -2,41 +2,61 @@ const { check } = require("express-validator"); // para hacer validaciones
 const { Router } = require("express");
 const { validateFields } = require("../middlewares/validate-fields");
 const { validateJWT } = require("../middlewares/validate-jwt");
-const { createProduct, getProducts } = require("../controllers/products");
+const {
+  createProduct,
+  getProducts,
+  getProductById,
+  deleteProduct,
+  updateProduct,
+} = require("../controllers/products");
+const { productExtists } = require("../helpers/db-validators");
+const { isAdminRole } = require("../middlewares/validate-roles");
 const router = Router();
 
-// obtener todas las categorias
+// obtener todas las producto
 router.get("/", getProducts);
 
-// obtener una categoria por id - publico
+// obtener una producto por id - publico
 router.get(
   "/:id",
-  []
+  [
+    check("id", "Not a valid Mongo id").isMongoId(),
+    check("id").custom(productExtists),
+    validateFields,
+  ],
+  getProductById
 );
 
-// crear una categoria - privado - cualquier persona con un token valido
+// crear una producto - privado - cualquier persona con un token valido
 router.post(
   "/",
   [
     validateJWT,
     check("name", "Name is required").not().isEmpty(),
-    validateFields
+    validateFields,
   ],
   createProduct
 );
 
 // actualizar un registro con este id - privado - cualquiera con token valido
-router.put(
+router.put("/:id", [
+  validateJWT,
+  check("id", "Not a valid Mongo id").isMongoId(),
+  check("id").custom(productExtists),
+  validateFields,
+], updateProduct);
+
+//borrar un producto - solo si es admin
+router.delete(
   "/:id",
   [
-
+    validateJWT,
+    isAdminRole,
+    check("id", "Not a valid Mongo id").isMongoId(),
+    check("id").custom(productExtists),
+    validateFields,
   ],
-  
+  deleteProduct
 );
-
-//borrar una categoris - solo si es admin
-router.delete("/:id", [
-
-], );
 
 module.exports = router;
