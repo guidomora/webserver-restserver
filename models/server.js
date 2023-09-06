@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const { dbConnection } = require("../database/config");
+const fileUpload = require('express-fileupload')
 
 class Server {
   constructor() {
@@ -12,6 +13,7 @@ class Server {
       categories: "/api/categories",
       products: "/api/products",
       search: "/api/search",
+      uploads: "/api/uploads",
     };
 
     // Conectar la base de datos
@@ -36,6 +38,12 @@ class Server {
     this.app.use(express.json()); // cualquien info que venga de post, put, delete la va a intentar serializar a un json
 
     this.app.use(express.static("public")); //use es la palabra clave para decir que es un middleware
+
+    // Carga de archivos
+    this.app.use(fileUpload({
+      useTempFiles : true,
+      tempFileDir : '/tmp/'
+  }));
   }
 
   routes() {
@@ -47,6 +55,7 @@ class Server {
     this.app.use(this.paths.categories, require("../routes/categories"));
     this.app.use(this.paths.products, require("../routes/products"));
     this.app.use(this.paths.search, require("../routes/search"));
+    this.app.use(this.paths.uploads, require("../routes/uploads")); 
   }
 
   listen() {
