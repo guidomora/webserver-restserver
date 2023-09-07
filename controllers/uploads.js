@@ -1,3 +1,5 @@
+const path = require('path')
+const fs = require('fs')
 const { request, response } = require("express");
 const { uploadFileHelper } = require("../helpers/upload-file");
 const User = require('../models/user')
@@ -48,6 +50,16 @@ const updateFile = async (req = request, res = response) => {
         msg: 'Forgot to validate this :('
       });
   }
+
+  // limpiar imagenes previas: reemplaza la imagen actual por la nueva que se sube
+  if (model.img) {
+    const imgPath = path.join(__dirname, '../uploads', collection, model.img)
+    // puede ser que el imgPath no exista entonces vamos a averiguar si existe
+    if (fs.existsSync(imgPath)) { // verifica
+      fs.unlinkSync(imgPath) // lo borra
+    }
+  }
+
   // al ser correcto se crea la imagen, con la carpeta con el nombre de la coleccion
   const name = await uploadFileHelper(req.files, undefined, collection);
   model.img = name // se sube la imagen al modelo

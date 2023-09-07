@@ -1,4 +1,7 @@
 // middleware personalizado
+//es más general y se usa para tareas como autenticación y autorización
+
+// las validaciones se enfocan en la verificación de datos específicos antes de que los mismos lleguen a los controladores
 
 const { validationResult } = require("express-validator")
 
