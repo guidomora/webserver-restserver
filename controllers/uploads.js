@@ -1,44 +1,63 @@
 const { request, response } = require("express");
-const path = require('path') // propio de node
+const { uploadFileHelper } = require("../helpers/upload-file");
+const User = require('../models/user')
+const Product = require('../models/product')
 
-const uploadFile = (req = request, res = response) => {
+const uploadFile = async (req = request, res = response) => {
   // Copiado del repositorio de express-fileupload
 
-  // pregunta si en la req esta la propiedad files
-  if (!req.files || Object.keys(req.files).length === 0 || !req.files.file) { // con el Object.keys hace un barrido de todos los files y evalua si por lo menos viene una propiedad ahi
-                                                                             // Tambien !req.files.file porque file es el nombre que le pusimos a como recibimos el archivo
-    res.status(400).send({msg:"No files were uploaded."}); // sino tambien arroja el error
-    return;
+  try {
+    // const name = await uploadFileHelper(req.files, ['txt'], 'textos') //// Modelo de como quedaria con todos los argumentos
+    const name = await uploadFileHelper(req.files, undefined, 'imgs');
+
+    res.json({
+      name,
+    });
+  } catch (error) {
+    res.status(400).json({
+      error,
+    });
   }
-
-
-  const {file} = req.files
-
-  const cutName = file.name.split('.') // divide cada vez que hay un punto
-  const extension = cutName[cutName.length - 1] // obtenemos la ultima posicion que siempre va a ser el tipo de archivo
-
-  // validar extension
-  const validExtensions = ['png', 'jpg', 'jpeg', 'gif']
-
-  if (!validExtensions.includes(extension)) {
-    return res.status(400).json({
-        msg:`The extension ${extension} is not allowed. Only ${validExtensions} are permitted`
-    })
-  }
-  res.json(extension)
-
-//   // el dirname va a apuntar a la carpeta de controllers pq es donde lo voy a llamar
-//   const uploadPath = path.join(__dirname,  "../uploads/", file.name) // path donde se van a crear los archivos
-
-//   file.mv(uploadPath, (err) => {
-//     if (err) {
-//       return res.status(500).json({err});
-//     }
-
-//     res.json({msg:"File uploaded to " + uploadPath});
-//   });
 };
+
+const updateFile = async (req = request, res = response) => {
+  const {collection, id} =req.params
+
+  let model; // se va a almacenar el modelo
+
+  switch (collection) { // validamos que segun la coleccion que recibamos, el id sea correcto
+    case 'users':
+      model = await User.findById(id)
+      if (!model) {
+        return res.status(400).json({
+          msg: 'There is no user with that id'
+        })
+      }
+      break;
+      case 'products':
+      model = await Product.findById(id)
+      if (!model) {
+        return res.status(400).json({
+          msg: 'There is no product with that id'
+        })
+      }
+      break;
+  
+    default:
+      return res.status(500).json({
+        msg: 'Forgot to validate this :('
+      });
+  }
+  // al ser correcto se crea la imagen, con la carpeta con el nombre de la coleccion
+  const name = await uploadFileHelper(req.files, undefined, collection);
+  model.img = name // se sube la imagen al modelo
+
+  await model.save() // se guarda en la db
+  
+  res.json(model)
+}
 
 module.exports = {
   uploadFile,
+  updateFile
 };
