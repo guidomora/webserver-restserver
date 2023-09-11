@@ -1,7 +1,7 @@
 const { check } = require("express-validator"); // para hacer validaciones
 const { Router } = require("express");
 const { validateFields } = require("../middlewares/validate-fields");
-const { uploadFile, updateFile, showImg } = require("../controllers/uploads");
+const { uploadFile, updateFile, showImg, showImgCloudinary } = require("../controllers/uploads");
 const { allowedCollections } = require("../helpers/db-validators");
 const { validateUploadedFile } = require("../middlewares/validate-file");
 const router = Router();
@@ -20,7 +20,8 @@ router.put(
     ),
     validateFields,
   ],
-  updateFile
+  //updateFile
+  showImgCloudinary
 );
 
 router.get("/:collection/:id", [
@@ -31,6 +32,6 @@ router.get("/:collection/:id", [
     allowedCollections(c, ["users", "products"])
   ),
   validateFields,
-], showImg);
+ ], showImg);
 
 module.exports = router;

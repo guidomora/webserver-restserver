@@ -4,6 +4,14 @@ const { request, response } = require("express");
 const { uploadFileHelper } = require("../helpers/upload-file");
 const User = require("../models/user");
 const Product = require("../models/product");
+const cloudinary = require('cloudinary').v2
+
+
+cloudinary.config({ 
+  cloud_name: 'node161', 
+  api_key: '227891163519395', 
+  api_secret: process.env.CLOUDINARY_API 
+});
 
 const uploadFile = async (req = request, res = response) => {
   // Copiado del repositorio de express-fileupload
@@ -117,8 +125,58 @@ const showImg = async (req = request, res = response) => {
   res.sendFile(noImgPath);
 };
 
+const showImgCloudinary = async (req = request, res = response) => {
+  const { id, collection } = req.params;
+
+  let model; // se va a almacenar el modelo
+
+  switch (
+    collection // validamos que segun la coleccion que recibamos, el id sea correcto
+  ) {
+    case "users":
+      model = await User.findById(id);
+      if (!model) {
+        return res.status(400).json({
+          msg: "There is no user with that id",
+        });
+      }
+      break;
+    case "products":
+      model = await Product.findById(id);
+      if (!model) {
+        return res.status(400).json({
+          msg: "There is no product with that id",
+        });
+      }
+      break;
+
+    default:
+      return res.status(500).json({
+        msg: "Forgot to validate this :(",
+      });
+  }
+
+  // si en ese id ya existe una imagen, se obtiene el nombre de esa imagen y se la elimina
+  if (model.img) {
+    const arrName = model.img.split('/')
+    const name = arrName[arrName.length - 1] // length te da el total y le restas 1 para tener siempre el ultimo contando desde el 0
+    const [ public_id ] = name.split('.')
+    cloudinary.uploader.destroy(public_id) // borra la iomagen a traves del id
+    console.log(model.img);
+  }
+
+  const {tempFilePath} = req.files.file
+
+  const {secure_url} = await cloudinary.uploader.upload(tempFilePath);
+  model.img = secure_url
+  await model.save()
+ 
+  res.json(model);
+};
+
 module.exports = {
   uploadFile,
   updateFile,
   showImg,
+  showImgCloudinary
 };
